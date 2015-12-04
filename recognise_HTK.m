@@ -1,4 +1,4 @@
-function [songsmatfile song] = recognise_HTK(dirnameA,dirnameB,gapminlength,sylminlength)
+function [songsmatfile, song] = recognise_HTK(dirnameA,dirnameB,gapminlength,sylminlength)
 % dirnameA must contains trained HTK recogniser
 % dirnameB must contains .wav files to be recognized
 % return file name of the songs datastructure with divided songs
@@ -17,7 +17,7 @@ uniksequencetxt = uniksequencetxt{1};
 sylid = 1:numel(uniksequencetxt);
 
 %%% RUN RECOGNIZER
-recognizeHMM(sylid,fullfile(dirnameA), fullfile(dirnameA,'/def'),dirnameB,dirnameB) ;
+recognizeHMM(sylid, fullfile(dirnameA), fullfile(dirnameA,'/def'), dirnameB, dirnameB) ;
 
 %%% create the song datastructure for dirnameB and save songs.mat
 files = dir(fullfile(dirnameB,'*.mlf')) ;
@@ -29,7 +29,7 @@ end
 % replace each syllable name as a numerical code to fill up song(n).sequence
 song = song_fill_seq(song,uniksequencetxt,2);
 songsmatfile = fullfile(dirnameB,'songs.mat') ;
-save('-v7',songsmatfile,'song') ;
+%save('-v7',songsmatfile,'song') ;
 
 for nfiles=1:numel(files)
     % write a TextGrid file with the syllable boundaries after having merged and cleaned with mlf2song()
@@ -47,3 +47,22 @@ end
 
 %%% view the songs with soong
 %soong(dirnameB,song);
+
+%%% save recognition data to csv file
+outputfile = fullfile(dirnameB,['/recognise_HTK_',datestr(now, 'yyyymmdd'),'.csv']);
+fid = fopen(outputfile, 'w');
+fprintf(fid, ',duration');
+for n=1:numel(uniksequencetxt)
+    fprintf(fid, ',%s',uniksequencetxt{n});
+end
+for nfiles=1:numel(files)
+    fprintf(fid, '%s,%f',song(nfiles).filename,song(nfiles).duration);
+    for s=1:numel(uniksequencetxt)
+        indexes = find(strcmp(song(nfiles).sequencetxt,uniksequencetxt(s)));
+        somme = sum(song(nfiles).SyllableE(indexes)-song(nfiles).SyllableS(indexes));
+        fprintf(fid, ',%d',somme/song(nfiles).Fs);
+    end
+    fprintf(fid, '\n');
+end
+fclose(fid);
+

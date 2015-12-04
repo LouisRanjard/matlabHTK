@@ -35,7 +35,7 @@ if nargin<3,modd=1; end
 fid = fopen(filename,'r') ;
 
 tline = fgetl(fid);
-if numel( findstr(tline,'#!MLF!#') )==0
+if numel( strfind(tline,'#!MLF!#') )==0
     fprintf(1,('not a mlf file\n'));
     return;
 end
@@ -43,7 +43,7 @@ end
 n = numel(song)+1 ;
 tline = fgetl(fid);
 % first get the filename
-if findstr(tline(1),'"')==1
+if strfind(tline(1),'"')==1
     sgfilename = strrep(tline,'"','') ;
     [pathstr, name] = fileparts(sgfilename) ;
     song(n).filename = [name '.wav'] ;
@@ -56,12 +56,14 @@ end
 % need to get the Fs from the wav file
 if nargin<8
     if exist(fullfile(pathstr,song(n).filename),'file')==2
-       [~, Fs] = wavread(fullfile(pathstr,song(n).filename),1); % only read the first sample
+       [y, Fs] = audioread(fullfile(pathstr,song(n).filename)); % only read the first sample
     else
        %warningMessage = sprintf('Warning: file does not exist:\n%s', fullfile(pathstr,song(n).filename));
-       error(sprintf('file does not exist: %s\n', fullfile(pathstr,song(n).filename)));
+       error('file does not exist: %s\n', fullfile(pathstr,song(n).filename));
     end
 end
+song(n).Fs = Fs ;
+song(n).duration = length(y)/Fs ;
 
 % convert minl in samples from ms
 minlgap = minlgap*(Fs/1000) ;
@@ -70,10 +72,10 @@ minlsyl = minlsyl*(Fs/1000) ;
 % fill the song structure
 tline = fgetl(fid) ;
 while 1
-    if findstr(tline,'.')==1, break, end % if the line starts with "." it means the eof is reached
+    if strcmp(tline,'.')==1, break, end % if the line is "." it means the eof is reached
     %[A, count, errmsg] = sscanf(tline,'%f %f syl%f %f') ;
     A = sscanf(tline,'%f %f syl%f %*f') ; % get beginning and end and syl number
-    [B, count, errmsg] = sscanf(tline,'%*f %*f %s %*f') ; % get the name
+    [B, ~, errmsg] = sscanf(tline,'%*f %*f %s %*f') ; % get the name
     if numel(errmsg)==0 %&& A(3)>0
         % convert 100ns -> samples under FsHz sampling frequency
         song(n).SyllableS = [song(n).SyllableS (A(1)*Fs)/10000000] ; 
