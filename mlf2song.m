@@ -56,7 +56,11 @@ end
 % need to get the Fs from the wav file
 if nargin<8
     if exist(fullfile(pathstr,song(n).filename),'file')==2
-       [y, Fs] = audioread(fullfile(pathstr,song(n).filename)); % only read the first sample
+        if is_octave()
+            [y, Fs] = wavread(fullfile(pathstr,song(n).filename)); % only read the first sample
+        else
+            [y, Fs] = audioread(fullfile(pathstr,song(n).filename)); % only read the first sample
+        end
     else
        %warningMessage = sprintf('Warning: file does not exist:\n%s', fullfile(pathstr,song(n).filename));
        error('file does not exist: %s\n', fullfile(pathstr,song(n).filename));
