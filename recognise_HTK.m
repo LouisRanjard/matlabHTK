@@ -51,16 +51,17 @@ end
 %%% save recognition data to csv file
 outputfile = fullfile(dirnameB,['/recognise_HTK_',datestr(now, 'yyyymmdd'),'.csv']);
 fid = fopen(outputfile, 'w');
-fprintf(fid, ',duration');
+fprintf(fid, ',duration (s)');
 for n=1:numel(uniksequencetxt)
     fprintf(fid, ',%s',uniksequencetxt{n});
 end
+fprintf(fid, '\n');
 for nfiles=1:numel(files)
-    fprintf(fid, '%s,%f',song(nfiles).filename,song(nfiles).duration);
+    fprintf(fid, '%s,%.2f',song(nfiles).filename,song(nfiles).duration);
     for s=1:numel(uniksequencetxt)
         indexes = find(strcmp(song(nfiles).sequencetxt,uniksequencetxt(s)));
         somme = sum(song(nfiles).SyllableE(indexes)-song(nfiles).SyllableS(indexes));
-        fprintf(fid, ',%d',somme/song(nfiles).Fs);
+        fprintf(fid, ',%.2f',somme/song(nfiles).Fs);
     end
     fprintf(fid, '\n');
 end
