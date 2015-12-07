@@ -1,10 +1,6 @@
 # matlabHTK
 Matlab Interface to HTK for Bioacoustic
 
-MatlabHTK requirements:
+MatlabHTK requires HTK (http://htk.eng.cam.ac.uk/) installed on system
 
-- VOICEBOX speech processing toolbox MATLAB routines to read/write HTK binary files
-http://www.ee.ic.ac.uk/hp/staff/dmb/voicebox/voicebox.html
-
-- HTK 
-http://htk.eng.cam.ac.uk/
+MatlabHTK uses VOICEBOX speech processing toolbox MATLAB routines to read/write HTK binary files (http://www.ee.ic.ac.uk/hp/staff/dmb/voicebox/voicebox.html)
