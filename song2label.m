@@ -24,7 +24,7 @@ end
 fprintf(1,filename);
 siz = wavread(filename,'size') ;
 % need to get the Fs from the wav file
-[y, Fs] = wavread(filename,1); % only read the first sample
+[~, Fs] = wavread(filename,1); % only read the first sample
 
 maxlen = siz(1)/Fs ;
 
