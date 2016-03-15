@@ -46,9 +46,19 @@ else
             fullfile(dirnameA,tmp)) ;
     end
 end
+% also allow .txt Audacity label files
+files = dir(fullfile(dirnameA,'*.txt')) ;
+if numel(files)>0
+    naudacity=numel(files);
+    for nfiles=1:numel(files)
+       tmp=regexprep(files(nfiles).name(end:-1:1),'txt.','flm.','once');tmp=tmp(end:-1:1); % allows to replace just once, the last one
+       label2mlf(fullfile(dirnameA,files(nfiles).name),...
+            fullfile(dirnameA,tmp)) ;
+    end
+end
 
 if nraven==0 && ntextgrid==0 && naudacity==0
-    error(['No annotated files (.raven or .TextGrid or .label) found in ' dirnameA]); end
+    error(['No annotated files (.raven or .TextGrid or .label or .txt) found in ' dirnameA]); end
 
 %%% make a song datastructure for the training files
 %%% process a directory containing .mlf files

@@ -9,7 +9,11 @@ function [] = check_label( filename, repair )
 
 if nargin<2, repair=0; end
 
-[a, b, labelt] = textread(filename,'%f\t%f\t%s');
+%if is_octave()
+[a, b, labelt] = textread(filename,'%f %f %s');
+%else
+%    [a, b, labelt] = textread(filename,'%f\t%f\t%s');
+%end
 
 fprintf(1,'%s\n',filename) ;
 for n=1:numel(a)
