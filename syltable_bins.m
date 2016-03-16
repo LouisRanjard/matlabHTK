@@ -1,8 +1,10 @@
-function [countlab uniklabel numlabel] = syltable_bins(syltable,binsiz,Fs,lengthy)
+function [countlab, uniklabel, numlabel] = syltable_bins(syltable,binsiz,Fs,lengthy)
 % syltable is the output of song2table()
 % binsiz is that size of the bin in seconds
 % Fs is the sampling frequency in Hz
 % lengthy is the total length of the recording in samples
+% 
+% return a table with time bins in row and label in column
 
     % convert in seconds
     syltable(:,1) = syltable(:,1)/Fs ;

@@ -12,11 +12,11 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
 
     % get the Fs
     tmp1=regexprep(filename1(end:-1:1),'lebal.','vaw.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
-    [~, Fs1] = wavread(tmp1,1) ;
-    length1 = wavread(tmp1,'size') ;
+    [y1, Fs1] = audioread(tmp1) ;
+    length1 = length(y1) ;
     tmp2=regexprep(filename2(end:-1:1),'lebal.','vaw.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
-    [~, Fs2] = wavread(tmp2,1) ;
-    length2 = wavread(tmp2,'size') ;
+    [y2, Fs2] = audioread(tmp2) ;
+    length2 = length(y2) ;
     if Fs1~=Fs2
         error('sampling frequencies are different');
     else
@@ -48,10 +48,10 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
     
     % create tables to use the comparison process
     syltable1 = song2table(song1) ;
-    countlab1 = syltable_bins(syltable1,binsiz,Fs,length1(1)) ;
+    [countlab1, uniklabel1] = syltable_bins(syltable1,binsiz,Fs,length1(1)) ;
 
     syltable2 = song2table(song2) ;
-    countlab2 = syltable_bins(syltable2,binsiz,Fs,length2(1)) ;
+    [countlab2, uniklabel2] = syltable_bins(syltable2,binsiz,Fs,length2(1)) ;
 
     % check conversion has been okay (allows 0.01 error)
     if sum( (sum(countlab1,2)>binsiz*1.01 | sum(countlab1,2)<binsiz*0.99)>0 )
@@ -60,10 +60,30 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
     if sum( (sum(countlab2,2)>binsiz*1.01 | sum(countlab2,2)<binsiz*0.99)>0 )
         error('conversion problem on file 2');
     end
+    
+    % check label are matching
+    if sum(uniklabel1-uniklabel2)~=0, error('conversion problem syltable_bins()'); end
 
+    % compute similarity
     similarity = simcountlab(countlab1,countlab2,binsiz) ;
     fprintf(1,'similarity = %.2f%%\n',similarity*100) ;
 
+    % create confusion matrix
+    cmat = confusionmatrix(countlab1,countlab2,uniklabel1) ;
+    % discard first label which is "0"
+    if (uniklabel1(1)==0)
+        codelabel = uniklabel1(2:end) ;
+        cmat = cmat(2:end,2:end) ;
+    end
+    % get the character annotation labels
+    annotlabel = cell(1,length(codelabel)) ;
+    for l=1:length(codelabel)
+        annotlabel{l} = song1.sequencetxt{find(song1.sequence==codelabel(l),1)} ;
+    end
+    % write to file
+    T = table(cmat,'RowNames',annotlabel) ;
+    writetable(T,[filename2 '.csv'],'WriteRowNames',true) ;
+    
     % do randomization test?
     if nargin>3
         nullsim = zeros(1,N) ;
@@ -92,6 +112,28 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
         eucldist = ( sum( (cntlab1(:,2:end)-cntlab2(:,2:end)).^2 ,2) ) .^ (1/2) ;
         % divide each euclidean distance by the maximum distance possible which is the size of the bin times two
         simscore = 1 - (sum(eucldist)/numel(eucldist))/(binsiz*2) ;
+    end
+
+    function [cmat] = confusionmatrix(cntlab1,cntlab2,uniklabel)
+        % compute confusion matrix, the first table is considered the
+        % reference, give the percentage of each annotation being
+        % recognised as each possible annotation
+        cmat=zeros(length(uniklabel));
+        labsum=zeros(1,length(uniklabel)); % record the total number of annotation for each label in the reference
+        % for each time bin, find the most common annotation in each label
+        % table
+        for tb=1:size(cntlab1,1)
+            [~,lab1] = max(cntlab1(tb,:)) ;
+            labsum(lab1) =  labsum(lab1) + 1 ;
+            [~,lab2] = max(cntlab2(tb,:)) ;
+            cmat(lab1,lab2) = cmat(lab1,lab2) + 1 ;
+        end
+        % divide each annotation by the total time in the reference
+        for lab=1:length(uniklabel)
+            if labsum(lab)>0
+                cmat(lab,:) = cmat(lab,:)/labsum(lab) ;
+            end
+        end
     end
 
 end
