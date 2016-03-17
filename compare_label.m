@@ -89,8 +89,14 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
         annotlabel{l} = song1.sequencetxt{find(song1.sequence==codelabel(l),1)} ;
     end
     % write to file
-    T = table(cmat,'RowNames',annotlabel) ;
-    writetable(T,[filename2 '.csv'],'WriteRowNames',true) ;
+    outid = fopen([filename2 '.csv'], 'w+');
+    for i = 1:length(annotlabel)
+        fprintf(outid, '%s,', annotlabel{i});
+    end
+    fclose(outid);
+    dlmwrite([filename2 '.csv'],cmat,'roffset',1,'-append') ;
+    %T = table(cmat,'RowNames',annotlabel) ;
+    %writetable(T,[filename2 '.csv'],'WriteRowNames',true) ;
     
     % do randomization test?
     if nargin>3
