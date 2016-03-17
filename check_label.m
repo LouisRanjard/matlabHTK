@@ -15,7 +15,12 @@ if nargin<2, repair=0; end
 %    [a, b, labelt] = textread(filename,'%f\t%f\t%s');
 %end
 
-fprintf(1,'%s\n',filename) ;
+fprintf(1,'%s ',filename) ;
+labeltu = sort(unique(labelt)) ;
+for n=1:size(labeltu,1)
+    fprintf(1,'%s ',labeltu{n});
+end
+fprintf(1,'\n') ;
 for n=1:numel(a)
     if (a(n)<0), fprintf(1,'negative boundary found at %.2f sec\n',a(n)); end
     if (b(n)<0), fprintf(1,'negative boundary found at %.2f sec\n',b(n)); end

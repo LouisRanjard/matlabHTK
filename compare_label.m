@@ -12,10 +12,18 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
 
     % get the Fs
     tmp1=regexprep(filename1(end:-1:1),'lebal.','vaw.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
-    [y1, Fs1] = audioread(tmp1) ;
+    if is_octave()
+        [y1, Fs1] = wavread(tmp1) ;
+    else
+        [y1, Fs1] = audioread(tmp1) ;
+    end
     length1 = length(y1) ;
     tmp2=regexprep(filename2(end:-1:1),'lebal.','vaw.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
-    [y2, Fs2] = audioread(tmp2) ;
+    if is_octave()
+        [y2, Fs2] = wavread(tmp2) ;
+    else
+        [y2, Fs2] = audioread(tmp2) ;
+    end
     length2 = length(y2) ;
     if Fs1~=Fs2
         error('sampling frequencies are different');
