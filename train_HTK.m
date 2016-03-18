@@ -110,4 +110,6 @@ for sid=sylid
     initialiseHMM(songtrain,fullfile(dirnameA,'train_HTK'),sid) ;
 end
 
+%%% clean up and save
+delete(fullfile(dirnameA,'*.mlf')) ;
 save('-v7',fullfile(dirnameA,'train_HTK/uniksequencetxt.mat'),'uniksequencetxt') ;
