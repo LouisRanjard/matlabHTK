@@ -67,7 +67,11 @@ if nargin<8
     end
 end
 song(n).Fs = Fs ;
-song(n).duration = length(y)/Fs ;
+if exist('y','var')
+    song(n).duration = length(y)/Fs ;
+else
+    song(n).duration = 0 ;
+end
 
 % convert minl in samples from ms
 minlgap = minlgap*(Fs/1000) ;
