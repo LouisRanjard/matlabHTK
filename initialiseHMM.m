@@ -63,8 +63,16 @@ for sg=randperm(numel(song)) % randomise the index of songs
 		continue ;
 	end
 	fprintf(1,'%s\n',filename) ;
-	[ y , Fs , bits ] = wavread(filename) ;
-	y = y(:,1) ; % conversion from stereo to mono
+    if is_octave()
+        [y, Fs, bits] = wavread(filename) ;
+    else
+        y = audioread(filename) ;
+        info = audioinfo(filename) ;
+        bits = info.BitsPerSample ;
+        Fs = info.SampleRate ;
+    end
+	
+    y = y(:,1) ; % conversion from stereo to mono
 	for sy=1:numel(song(sg).SyllableS)
 		if id==0 % look for noise, take the noise chunks before each syllable (therefore do not use the last noise chunk at the end of the songs)
 			deb = round( (sy>1)*song(sg).SyllableE(sy-(sy>1))+(sy==1) ) ;
