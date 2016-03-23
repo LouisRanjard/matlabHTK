@@ -58,8 +58,9 @@ timeax = zeros(numel(timeaxsec),1);
 for i=1:numel(timeaxsec)
     timeax(i) = addtodate(timestart,timeaxsec(i),'second') ;
 end
-plot( timeax, activity, '-o') ;
+bar( timeax, activity, 1) ;
 ylim([0 1]);
+set(gca,'TickLength',[0 0]);
 datetick('x','HH:MM:SS') ;
 xlabel(datestr(timestart)) ;
 set(gcf, 'papersize', [10, 3]);
@@ -70,7 +71,7 @@ print([filenameW '.eps'],'-deps');
 
 % save to csv
 datatable = horzcat(timeaxsec,activity);
-fid = fopen([filenameW '.csv'],'w+');
+fid = fopen([filenameW '.plot_Label.csv'],'w+');
 fprintf(fid,'%s,%s\n','Second',['Percentage_' label]);
 for n=1:size(datatable,1)
   fprintf(fid,'%s,%s\n',num2str(datatable(n,1)),num2str(datatable(n,2)));
