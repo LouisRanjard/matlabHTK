@@ -5,6 +5,13 @@ function [] = createcffile_mixt(dirname,nstat,nmixt)
 % the same weight is initially given to each mixture
 % 
 
+if nargin<3
+    nmixt=4 ; % number of mixtures
+    if nargin<2
+        nstat=6 ; % number of states
+    end
+end
+
 % encoding parameters
 coefftype = 'MFCC' ; %[MFCC]
 numcoeff = 24 ; % number of coefficients without the energy [12]

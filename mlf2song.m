@@ -57,9 +57,9 @@ end
 if nargin<8
     if exist(fullfile(pathstr,song(n).filename),'file')==2
         if is_octave()
-            [y, Fs] = wavread(fullfile(pathstr,song(n).filename)); % only read the first sample
+            [~, Fs] = wavread(fullfile(pathstr,song(n).filename),1); % only read the first sample
         else
-            [y, Fs] = audioread(fullfile(pathstr,song(n).filename)); % only read the first sample
+            [~, Fs] = audioread(fullfile(pathstr,song(n).filename),[1,1]); % only read the first sample
         end
     else
        %warningMessage = sprintf('Warning: file does not exist:\n%s', fullfile(pathstr,song(n).filename));

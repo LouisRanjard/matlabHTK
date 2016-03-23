@@ -1,10 +1,13 @@
 function [uniksequencetxt] = train_HTK(dirnameA)
 % TRAIN A SIMPLE HMM RECOGNIZER USING HTK
-% dirnameA must contains annotated .wav files with praat (.TestGrid files)
+% dirnameA must contains annotated .wav files with praat (.TestGrid files) or others:
 % or raven (.raven files)
 % or Audacity (.label files)
 
 if nargin<1, dirnameA='' ; end
+
+% allow to find wav files
+addpath(dirnameA);
 
 %%% RAVEN MANUAL ANNOTATION
 files = dir(fullfile(dirnameA,'*.raven')) ;
@@ -100,7 +103,7 @@ songtrain = song_fill_seq(songtrain,uniksequencetxt,1) ;
 % convert all sequences into "1" sequences, thus all syllable have the same id
 %for n=1:numel(song) song(n).sequence=(song(n).sequence.*0)+1 ; end
 if ~exist(fullfile(dirnameA,'train_HTK'),'file'), mkdir(fullfile(dirnameA,'train_HTK')) ; end
-createcffile_mixt(fullfile(dirnameA,'train_HTK'),6,4) ;
+createcffile_mixt(fullfile(dirnameA,'train_HTK')) ;
 sylid = unique([songtrain.sequence]);
 % create the grammar and dictionary configuration files
 createcffile_grammar(fullfile(dirnameA,'train_HTK'),sylid);
@@ -113,3 +116,4 @@ end
 %%% clean up and save
 delete(fullfile(dirnameA,'*.mlf')) ;
 save('-v7',fullfile(dirnameA,'train_HTK/uniksequencetxt.mat'),'uniksequencetxt') ;
+rmpath(dirnameA);

@@ -25,8 +25,14 @@ end
 %ainfo = audioinfo(filenameW) ; % not implemented in Octave
 %Fs = ainfo.SampleRate ;
 %length1 = ainfo.TotalSamples ;
-[~, Fs] = wavread(filenameW,1);
-length1 = wavread(filenameW, 'size');
+if is_octave()
+    [~, Fs] = wavread(filenameW,1) ;
+    length1 = wavread(filenameW, 'size');
+else
+    info = audioinfo(filenameW) ;
+    Fs = info.SampleRate ;
+    length1 = info.TotalSamples ;
+end
 
 tmp = regexprep(filenameL(end:-1:1),'lebal.','flm.','once');
 tmp = tmp(end:-1:1); % allows to replace just once, the last one

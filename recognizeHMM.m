@@ -52,6 +52,8 @@ for recf=1:numel(recfiles)
     tmp1=regexprep(recfiles(recf).name(end:-1:1),'vaw.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
     tmp2=regexprep(recfiles(recf).name(end:-1:1),'vaw.','tcev.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
 	system([HVite_string ' -i ' fullfile(destdir,tmp1) ' -w ' defdir '/net.slf ' defdir '/dict.txt ' defdir '/hmmlist.txt ' fullfile(destdir,tmp2)]) ;
+    % remove encoded files
+    delete(fullfile(destdir,tmp2)) ;
 	% convert to TextGrid for Praat display
     % do it later after the limits on gap and syllable lengths have been applied
 	% mlf2textGrid( strrep(fullfile(destdir,recfiles(recf).name),'.wav','.mlf'), strrep(fullfile(destdir,recfiles(recf).name),'.wav','.textGrid') ) ;

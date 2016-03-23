@@ -3,6 +3,9 @@ function [songsmatfile, song] = recognise_HTK(dirnameA,dirnameB,gapminlength,syl
 % dirnameB must contains .wav files to be recognized
 % return file name of the songs datastructure with divided songs
 
+% allow to find wav file
+addpath(dirnameB);
+
 % default minimum syllable length=120ms, minimum gap length=100ms 
 if nargin<4, sylminlength=120 ; end
 if nargin<3, gapminlength=100 ; end
@@ -38,9 +41,12 @@ for nfiles=1:numel(files)
     % write a label file with the syllable boundaries after having merged and cleaned with mlf2song()
     tmp=regexprep(files(nfiles).name(end:-1:1),'flm.','lebal.','once');tmp=tmp(end:-1:1); % allows to replace just once, the last one
     song2label( song(nfiles), fullfile(dirnameB,tmp), 2 ) ;
+    % delete mlf file
+    
 end
     
 %%% print the structure for info
+fprintf(1,'\n\n');
 for nsyl=1:numel(uniksequencetxt)
     fprintf(1,'%1.0f %s\n',nsyl,uniksequencetxt{nsyl});
 end
@@ -49,21 +55,27 @@ end
 %soong(dirnameB,song);
 
 %%% save recognition data to csv file
-outputfile = fullfile(dirnameB,['/recognise_HTK_',datestr(now, 'yyyymmdd'),'.csv']);
+outputfile = fullfile(dirnameB,['/recognise_HTK_',datestr(now, 'yyyymmddMMSS'),'.csv']);
 fid = fopen(outputfile, 'w');
-fprintf(fid, ',duration (s)');
-for n=1:numel(uniksequencetxt)
-    fprintf(fid, ',%s',uniksequencetxt{n});
-end
-fprintf(fid, '\n');
-for nfiles=1:numel(files)
-    fprintf(fid, '%s,%.2f',song(nfiles).filename,song(nfiles).duration);
-    for s=1:numel(uniksequencetxt)
-        indexes = find(strcmp(song(nfiles).sequencetxt,uniksequencetxt(s)));
-        somme = sum(song(nfiles).SyllableE(indexes)-song(nfiles).SyllableS(indexes));
-        fprintf(fid, ',%.2f',somme/song(nfiles).Fs);
+if fid~=-1
+    fprintf(fid, ',duration_sec');
+    for n=1:numel(uniksequencetxt)
+        fprintf(fid, ',%s',uniksequencetxt{n});
     end
     fprintf(fid, '\n');
+    for nfiles=1:numel(files)
+        fprintf(fid, '%s,%.2f',song(nfiles).filename,song(nfiles).duration);
+        for s=1:numel(uniksequencetxt)
+            indexes = find(strcmp(song(nfiles).sequencetxt,uniksequencetxt(s)));
+            somme = sum(song(nfiles).SyllableE(indexes)-song(nfiles).SyllableS(indexes));
+            fprintf(fid, ',%.2f',somme/song(nfiles).Fs);
+        end
+        fprintf(fid, '\n');
+    end
+    fclose(fid);
+else
+    fprintf(1,'cannot open file: %s \n',outputfile);
 end
-fclose(fid);
 
+% clean path
+rmpath(dirnameB);
