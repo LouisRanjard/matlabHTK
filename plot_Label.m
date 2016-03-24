@@ -52,22 +52,28 @@ activity =  countlab(:,colnum) ./ sum(countlab, 2) ;
 
 
 % plotting
-figure('Position', [0, 0, 1200, 400]);
-timeaxsec = cumsum(sum(countlab,2)) ;
+figure('Units', 'pixels', 'Position', [0, 0, 1000, 400], 'PaperPositionMode', 'auto');
+timeaxsec = round(cumsum(sum(countlab,2))) ;
 timeax = zeros(numel(timeaxsec),1);
 for i=1:numel(timeaxsec)
     timeax(i) = addtodate(timestart,timeaxsec(i),'second') ;
 end
-bar( timeax, activity, 1) ;
+bar( timeax, activity, 1, 'FaceColor', [.25 .6 .9], 'EdgeColor', [.25 .6 .9]) ;
 ylim([0 1]);
-set(gca,'TickLength',[0 0]);
-datetick('x','HH:MM:SS') ;
+set(gca,'TickLength',[0 0],...
+    'FontUnits','points',...
+    'FontWeight','normal',...
+    'FontSize',11,...
+    'FontName','Times');
+datetick('x','HH:MM:SS','keeplimits') ;
 xlabel(datestr(timestart)) ;
-set(gcf, 'papersize', [10, 3]);
-set(gcf,'paperposition', [0,0,[10 4]]);
+if is_octave()
+  set(gcf, 'papersize', [10, 3]);
+  set(gcf, 'paperposition', [0,0,[10 4]]);
+end
 orient landscape;
 %print([filenameW '.pdf'],'-dpdf');
-print([filenameW '.eps'],'-deps');
+print([filenameW '.eps'],'-depsc2');
 
 % save to csv
 datatable = horzcat(timeaxsec,activity);
@@ -78,3 +84,5 @@ for n=1:size(datatable,1)
 end
 fclose(fid);
 
+% clean up
+delete(fullfile(tmp)) ;
