@@ -60,7 +60,7 @@ fid = fopen(outputfile, 'w');
 if fid~=-1
     fprintf(fid, ',duration_sec');
     for n=1:numel(uniksequencetxt)
-        fprintf(fid, ',%s',uniksequencetxt{n});
+        fprintf(fid, ',%s,',uniksequencetxt{n});
     end
     fprintf(fid, '\n');
     for nfiles=1:numel(files)
@@ -68,7 +68,7 @@ if fid~=-1
         for s=1:numel(uniksequencetxt)
             indexes = find(strcmp(song(nfiles).sequencetxt,uniksequencetxt(s)));
             somme = sum(song(nfiles).SyllableE(indexes)-song(nfiles).SyllableS(indexes));
-            fprintf(fid, ',%.2f',somme/song(nfiles).Fs);
+            fprintf(fid, ',%.2f,%d',somme/song(nfiles).Fs,numel(indexes));
         end
         fprintf(fid, '\n');
     end
@@ -78,4 +78,5 @@ else
 end
 
 % clean path
-rmpath(dirnameB);
+rmpath(dirnameB) ;
+

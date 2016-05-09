@@ -123,7 +123,7 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
     function [simscore] = simcountlab(cntlab1,cntlab2,binsiz)
         % euclidean distance of each row vector
         %eucldist = sqrt( sum( (cntlab1(:,2:end)-cntlab2(:,2:end)).^2 ,2) ) ;
-        eucldist = ( sum( (cntlab1(:,2:end)-cntlab2(:,2:end)).^2 ,2) ) .^ (1/2) ;
+        eucldist = ( sum((cntlab1(:,2:end)-cntlab2(:,2:end)).^2 ,2) ).^(1/2) ;
         % divide each euclidean distance by the maximum distance possible which is the size of the bin times two
         simscore = 1 - (sum(eucldist)/numel(eucldist))/(binsiz*2) ;
     end
