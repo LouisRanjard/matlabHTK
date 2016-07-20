@@ -31,4 +31,9 @@ The calls to HTK functions are _**indicated**_.
 * conduct a randomization test to assess significance of the similarity score
 * write a confusion matrix for the first input label file to the second input label file
 
+### plot_label()
+* plot histogram of activity for a given input label
+* consecutive time windows are considered and the proportion of the total window duration annotated as the input label is plotted
+* output a csv file indicating the proportions of each time window annotated as the input label
+
 
