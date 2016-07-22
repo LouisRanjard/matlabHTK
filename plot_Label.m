@@ -67,6 +67,7 @@ set(gca,'TickLength',[0 0],...
     'FontName','Times');
 datetick('x','HH:MM:SS','keeplimits') ;
 xlabel(datestr(timestart)) ;
+ylabel(['Proportion "' strrep(label,'_','\_') '"']);
 if is_octave()
   set(gcf, 'papersize', [10, 3]);
   set(gcf, 'paperposition', [0,0,[10 4]]);
