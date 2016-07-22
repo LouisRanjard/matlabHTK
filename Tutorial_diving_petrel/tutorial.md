@@ -1,22 +1,20 @@
----
-output: html_document
----
 
 ### Tutorial matlabHTK
-This tutorial presents how to set a HMM recogniser using previously annotated exmaple label files in Audacity.
+This tutorial presents how to set a HMM recogniser using previously annotated example label files with Audacity.
 
 ---
 
 #### Download and unzip the last version of matlabHTK from https://github.com/LouisRanjard/matlabHTK
-Add the matlabHTK function to the Matlab/Octave path
+Add the matlabHTK function to the Matlab/Octave path and change directory to the tutorial directory
 ```
 addpath(genpath('matlabHTK')) ;
+cd /path/to/Tutorial_diving_petrel ;
 ```
 
 #### Training
 Set up and train HMMs for each label found in the manually annotated label files in training directory
 ```
-train_HTK('./training_dir');
+train_HTK('./training');
 ```
 
 #### Recognition
@@ -28,7 +26,7 @@ recognise_HTK('./training_dir/train_HTK','./recognition');
 #### Plot
 Plot the recognition results for the label 'diving_petrel'
 ```
-plot_Label('./recognition/recording.label','./recognition/recording.wav','diving_petrel');
+plot_Label('./recognition/reference/recording.label','./recognition/recording.wav','diving_petrel');
 ```
 
 ---

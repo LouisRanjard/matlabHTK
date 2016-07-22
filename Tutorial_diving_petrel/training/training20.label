@@ -1,0 +1,10 @@
+0	1.024	diving_petrel
+1.024	1.895	silence
+1.895	2.0168	noise
+2.0168	3.1969	diving_petrel
+3.1969	4.8172	silence
+4.8172	5.0185	noise
+5.0185	5.6227	diving_petrel
+5.6227	5.7725	noise
+5.7725	7.5286	diving_petrel
+7.5286	8	silence

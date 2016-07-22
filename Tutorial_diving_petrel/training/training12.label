@@ -1,0 +1,13 @@
+0	0.18409	diving_petrel
+0.18409	0.23894	background
+0.23894	0.70187	diving_petrel
+0.70187	1.514	diving_petrel
+1.514	1.5931	noise
+1.5931	1.7014	background
+1.7014	1.9164	diving_petrel
+1.9164	2.0239	background
+2.0239	2.1245	diving_petrel
+2.1245	3.0676	diving_petrel
+3.0676	3.5172	background
+3.5172	4.4465	diving_petrel
+4.4465	4.7052	diving_petrel
