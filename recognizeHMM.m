@@ -48,16 +48,26 @@ fclose(fid) ;
 % compute coefficients
 recfiles = dir(fullfile(filesdir,'*.wav')) ;
 for recf=1:numel(recfiles)
-    info = audioinfo(recfiles(recf).name);
-    Fs = info.SampleRate;
-    TotalSamples = info.TotalSamples;
+    if is_octave()
+        [~, Fs] = wavread(recfiles(recf).name,1) ;
+        TotalSamples = wavread(recfiles(recf).name,'size') ;
+    else
+        info = audioinfo(recfiles(recf).name);
+        Fs = info.SampleRate;
+        TotalSamples = info.TotalSamples;
+    end
     chunkCnt = 1;
     for startLoc = 1:(maxfilechunk*60*Fs):TotalSamples % break into file of chunk size max
         endLoc = min(startLoc + maxfilechunk*60 - 1, TotalSamples);
         if (TotalSamples>endLoc) % write a temporary wav file of required length
-            y = audioread(recfiles(recf).name, [startLoc endLoc]);
             FileName = sprintf('outfile%03d.wav', chunkCnt);
-            audiowrite(FileName, y, Fs);
+            if is_octave()
+                y = wavread(recfiles(recf).name, [startLoc endLoc]);
+                wavwrite(y, Fs, FileName);
+            else
+                y = audioread(recfiles(recf).name, [startLoc endLoc]);
+                audiowrite(FileName, y, Fs);
+            end
             chunkCnt = chunkCnt + 1;
         else
             FileName = recfiles(recf).name;
