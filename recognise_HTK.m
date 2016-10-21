@@ -1,10 +1,13 @@
-function [songsmatfile, song] = recognise_HTK(dirnameA,dirnameB,gapminlength,sylminlength)
+function [songsmatfile, song] = recognise_HTK(dirnameA,dirnameB,gapminlength,sylminlength,maxfilechunk)
 % dirnameA must contains trained HTK recogniser
 % dirnameB must contains .wav files to be recognized
 % return file name of the songs datastructure with divided songs
 
 % allow to find wav file
 addpath(dirnameB);
+
+% default maximum file duration in minutes to be recognised (split files if larger)
+if nargin<5, maxfilechunk=240 ; end
 
 % default minimum syllable length=120ms, minimum gap length=100ms 
 if nargin<4, sylminlength=120 ; end
@@ -20,7 +23,7 @@ uniksequencetxt = uniksequencetxt{1};
 sylid = 1:numel(uniksequencetxt);
 
 %%% RUN RECOGNIZER
-recognizeHMM(sylid, fullfile(dirnameA), fullfile(dirnameA,'/def'), dirnameB, dirnameB) ;
+recognizeHMM(sylid, fullfile(dirnameA), fullfile(dirnameA,'/def'), dirnameB, dirnameB, maxfilechunk) ;
 
 %%% create the song datastructure for dirnameB and save songs.mat
 files = dir(fullfile(dirnameB,'*.mlf')) ;

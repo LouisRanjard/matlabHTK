@@ -1,10 +1,12 @@
-function [] = recognizeHMM( idlist, rootdir, defdir, filesdir, destdir, normavec )
+function [] = recognizeHMM( idlist, rootdir, defdir, filesdir, destdir, normavec, maxfilechunk )
 % given a list of HMM (idlist), found in rootdir/hmms/HMM(idlist[n])
 % performs recognition from the set of files in filesdir (filesdir/*.wav files)
 % creates the encoded wav files and recognition files in destdir
 % uses the grammar definition of defdir/gram.txt and defdir/dict.txt
 % uses configuration variable for HVite defdir/configvar.txt
 % example: recognizeHMM( [0;1], '/data/Tieke/testhtk/', '/data/Tieke/testhtk/def', '/data/Tieke/testhtk/data', '/data/Tieke/testhtk/data' );
+
+if nargin<7, maxfilechunk=240; end
 
 if nargin<6, normavec=[]; end
 
@@ -44,17 +46,62 @@ fclose(fid) ;
 
 % Do recognition for each file in files dir
 % compute coefficients
-encodeWavlist( filesdir, fullfile(rootdir,'analysis'), destdir,normavec) ;
 recfiles = dir(fullfile(filesdir,'*.wav')) ;
 for recf=1:numel(recfiles)
-	% system(['HCopy -A -C ' rootdir '/analysis/analysis.conf ' fullfile(filesdir,recfiles(recf).name) ' ' strrep(fullfile(filesdir,recfiles(recf).name),'.wav','.vect')]) ;
-	% run the Viterbi
-    tmp1=regexprep(recfiles(recf).name(end:-1:1),'vaw.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
-    tmp2=regexprep(recfiles(recf).name(end:-1:1),'vaw.','tcev.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
-	system([HVite_string ' -i ' fullfile(destdir,tmp1) ' -w ' defdir '/net.slf ' defdir '/dict.txt ' defdir '/hmmlist.txt ' fullfile(destdir,tmp2)]) ;
-    % remove encoded files
-    delete(fullfile(destdir,tmp2)) ;
-	% convert to TextGrid for Praat display
-    % do it later after the limits on gap and syllable lengths have been applied
-	% mlf2textGrid( strrep(fullfile(destdir,recfiles(recf).name),'.wav','.mlf'), strrep(fullfile(destdir,recfiles(recf).name),'.wav','.textGrid') ) ;
+    info = audioinfo(recfiles(recf).name);
+    Fs = info.SampleRate;
+    TotalSamples = info.TotalSamples;
+    chunkCnt = 1;
+    for startLoc = 1:(maxfilechunk*60*Fs):TotalSamples % break into file of chunk size max
+        endLoc = min(startLoc + maxfilechunk*60 - 1, TotalSamples);
+        if (TotalSamples>endLoc) % write a temporary wav file of required length
+            y = audioread(recfiles(recf).name, [startLoc endLoc]);
+            FileName = sprintf('outfile%03d.wav', chunkCnt);
+            audiowrite(FileName, y, Fs);
+            chunkCnt = chunkCnt + 1;
+        else
+            FileName = recfiles(recf).name;
+        end
+        % system(['HCopy -A -C ' rootdir '/analysis/analysis.conf ' fullfile(filesdir,recfiles(recf).name) ' ' strrep(fullfile(filesdir,recfiles(recf).name),'.wav','.vect')]) ;
+        encodeWavlist( filesdir, fullfile(rootdir,'analysis'), destdir, normavec, FileName) ;
+        % run the Viterbi
+        tmp1=regexprep(FileName(end:-1:1),'vaw.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
+        tmp2=regexprep(FileName(end:-1:1),'vaw.','tcev.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
+        system([HVite_string ' -i ' fullfile(destdir,tmp1) ' -w ' defdir '/net.slf ' defdir '/dict.txt ' defdir '/hmmlist.txt ' fullfile(destdir,tmp2)]) ;
+        % remove encoded files
+        delete(fullfile(destdir,tmp2)) ;
+        % convert to TextGrid for Praat display
+        % do it later after the limits on gap and syllable lengths have been applied
+        % mlf2textGrid( strrep(fullfile(destdir,recfiles(recf).name),'.wav','.mlf'), strrep(fullfile(destdir,recfiles(recf).name),'.wav','.textGrid') ) ;
+    end
+    % merge all the mlf files
+    if (chunkCnt>1)
+        fileout = regexprep(recfiles(recf).name(end:-1:1),'vaw.','flm.','once') ; fileout=fileout(end:-1:1) ;
+        fido = fopen(fileout,'w') ;
+        fprintf(fido,'#!MLF!#\n"%s"\n',fileout) ;
+        for n=1:(chunkCnt-1)
+            t_shift = 0 ;
+            mlfFileName = sprintf('outfile%03d.mlf', n) ;
+            fidi = fopen(fullfile(destdir,mlfFileName),'r') ;
+            tline = fgetl(fidi) ;
+            if numel( strfind(tline,'#!MLF!#') )==0, error(1,('recognizeHMM(): mlf file format error\n')); end
+            tline = fgetl(fidi) ; % skip mlf file name
+            tline = fgetl(fidi) ;
+            while 1
+                if strcmp(tline,'.')==1, break, end % if the line is "." it means the eof is reached
+                A = sscanf(tline,'%f %f syl%f %*f') ; % get beginning and end and name of recognised segment
+                [B, ~, errmsg] = sscanf(tline,'%*f %*f %s %*f') ; % get the segment name
+                if numel(errmsg)==0
+                    fprintf(fido,'%s %s %s 0\n',num2str(t_shift+A(1)),num2str(t_shift+A(2)),char(B)') ;
+                end
+                tline = fgetl(fid) ;
+            end
+            t_shift = t_shift + A(2) ; % keep track of duration of each splitted file
+            fclose(fidi) ;
+            delete(fullfile(destdir,mlfFileName)) ;
+        end
+        % end the mlf file (always need a ".")
+        fprintf(fido,'.\n') ;
+        fclose(fido) ;
+    end
 end

@@ -1,9 +1,10 @@
-function [syllab] = encodeWavlist( wavdir, analysisdir, coeffdir, normavec )
+function [syllab] = encodeWavlist( wavdir, analysisdir, coeffdir, normavec, filefilter )
 % encode the wav files in wavdir according to the coding parameters of the configuration files in analysisdir
 % if there is more than one configuration file, each one is used and the vector sequences are merged
 % the final vector sequence is saved in coeffdir with .vect extension instead of .wav
 % need VOICEBOX for writing and reading HTK file format
 
+if nargin<5, filefilter=''; end % to apply a filter on file name
 if nargin<4, normavec=[]; end
 if nargin<3, coeffdir=wavdir; end
 
@@ -11,7 +12,7 @@ if nargout>0
     syllab = struct('seqvect',{}) ;
 end
 
-wavfiles = dir(fullfile(wavdir,'*.wav')) ;
+wavfiles = dir(fullfile(wavdir,[filefilter '*.wav'])) ;
 for sylf=1:numel(wavfiles)
     % fprintf(1,'%s\n',wavfiles(sylf).name) ;
     % if exist(fullfile(coeffdir,strrep(wavfiles(sylf).name,'.wav','.vect')))
