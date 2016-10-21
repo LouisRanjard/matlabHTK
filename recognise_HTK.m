@@ -23,7 +23,7 @@ uniksequencetxt = uniksequencetxt{1};
 sylid = 1:numel(uniksequencetxt);
 
 %%% RUN RECOGNIZER
-recognizeHMM(sylid, fullfile(dirnameA), fullfile(dirnameA,'/def'), dirnameB, dirnameB, maxfilechunk) ;
+recognizeHMM(sylid, fullfile(dirnameA), fullfile(dirnameA,'/def'), dirnameB, dirnameB, [], maxfilechunk) ;
 
 %%% create the song datastructure for dirnameB and save songs.mat
 files = dir(fullfile(dirnameB,'*.mlf')) ;

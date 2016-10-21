@@ -49,31 +49,32 @@ fclose(fid) ;
 recfiles = dir(fullfile(filesdir,'*.wav')) ;
 for recf=1:numel(recfiles)
     if is_octave()
-        [~, Fs] = wavread(recfiles(recf).name,1) ;
-        TotalSamples = wavread(recfiles(recf).name,'size') ;
+        [~, Fs] = wavread(fullfile(destdir,recfiles(recf).name),1) ;
+        TotalSamples = wavread(fullfile(destdir,recfiles(recf).name),'size') ;
     else
-        info = audioinfo(recfiles(recf).name);
+        info = audioinfo(fullfile(destdir,recfiles(recf).name));
         Fs = info.SampleRate;
         TotalSamples = info.TotalSamples;
     end
     chunkCnt = 1;
     for startLoc = 1:(maxfilechunk*60*Fs):TotalSamples % break into file of chunk size max
-        endLoc = min(startLoc + maxfilechunk*60 - 1, TotalSamples);
+        endLoc = min(startLoc + maxfilechunk*60*Fs - 1, TotalSamples);
         if (TotalSamples>endLoc) % write a temporary wav file of required length
             FileName = sprintf('outfile%03d.wav', chunkCnt);
             if is_octave()
-                y = wavread(recfiles(recf).name, [startLoc endLoc]);
-                wavwrite(y, Fs, FileName);
+                y = wavread(fullfile(destdir,recfiles(recf).name), [startLoc endLoc]);
+                wavwrite(y, Fs, fullfile(destdir,FileName));
             else
-                y = audioread(recfiles(recf).name, [startLoc endLoc]);
-                audiowrite(FileName, y, Fs);
+                y = audioread(fullfile(destdir,recfiles(recf).name), [startLoc endLoc]);
+                audiowrite(fullfile(destdir,FileName), y, Fs);
             end
             chunkCnt = chunkCnt + 1;
-        else
+        elseif (chunkCnt == 1)
             FileName = recfiles(recf).name;
         end
         % system(['HCopy -A -C ' rootdir '/analysis/analysis.conf ' fullfile(filesdir,recfiles(recf).name) ' ' strrep(fullfile(filesdir,recfiles(recf).name),'.wav','.vect')]) ;
-        encodeWavlist( filesdir, fullfile(rootdir,'analysis'), destdir, normavec, FileName) ;
+        [~,filenoext,~] = fileparts(FileName) ;
+        encodeWavlist( filesdir, fullfile(rootdir,'analysis'), destdir, normavec, filenoext) ;
         % run the Viterbi
         tmp1=regexprep(FileName(end:-1:1),'vaw.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
         tmp2=regexprep(FileName(end:-1:1),'vaw.','tcev.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
@@ -87,10 +88,10 @@ for recf=1:numel(recfiles)
     % merge all the mlf files
     if (chunkCnt>1)
         fileout = regexprep(recfiles(recf).name(end:-1:1),'vaw.','flm.','once') ; fileout=fileout(end:-1:1) ;
-        fido = fopen(fileout,'w') ;
+        fido = fopen(fullfile(destdir,fileout),'w') ;
         fprintf(fido,'#!MLF!#\n"%s"\n',fileout) ;
+        t_shift = 0 ;
         for n=1:(chunkCnt-1)
-            t_shift = 0 ;
             mlfFileName = sprintf('outfile%03d.mlf', n) ;
             fidi = fopen(fullfile(destdir,mlfFileName),'r') ;
             tline = fgetl(fidi) ;
@@ -104,11 +105,12 @@ for recf=1:numel(recfiles)
                 if numel(errmsg)==0
                     fprintf(fido,'%s %s %s 0\n',num2str(t_shift+A(1)),num2str(t_shift+A(2)),char(B)') ;
                 end
-                tline = fgetl(fid) ;
+                tline = fgetl(fidi) ;
             end
             t_shift = t_shift + A(2) ; % keep track of duration of each splitted file
             fclose(fidi) ;
             delete(fullfile(destdir,mlfFileName)) ;
+	        delete(fullfile(destdir,sprintf('outfile%03d.wav', n))) ;
         end
         % end the mlf file (always need a ".")
         fprintf(fido,'.\n') ;
