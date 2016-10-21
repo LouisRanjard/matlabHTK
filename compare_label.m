@@ -12,33 +12,45 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
 
     % get the Fs
     tmp1=regexprep(filename1(end:-1:1),'lebal.','vaw.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
-    if is_octave()
-        [y1, Fs1] = wavread(tmp1) ;
-    else
-        [y1, Fs1] = audioread(tmp1) ;
-    end
-    length1 = length(y1) ;
     tmp2=regexprep(filename2(end:-1:1),'lebal.','vaw.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
-    if is_octave()
-        [y2, Fs2] = wavread(tmp2) ;
-    else
-        [y2, Fs2] = audioread(tmp2) ;
+    if exist(tmp1, 'file')==2
+        if is_octave()
+            [y1, Fs1] = wavread(tmp1) ;
+        else
+            [y1, Fs1] = audioread(tmp1) ;
+        end
+        length1 = length(y1) ;
     end
-    length2 = length(y2) ;
-    if Fs1~=Fs2
-        error('sampling frequencies are different');
-    else
+    if exist(tmp2, 'file')==2
+        if is_octave()
+            [y2, Fs2] = wavread(tmp2) ;
+        else
+            [y2, Fs2] = audioread(tmp2) ;
+        end
+        length2 = length(y2) ;
+    end
+    if (exist(tmp1, 'file')==2) && (exist(tmp2, 'file')==2)
+        if Fs1~=Fs2
+            error('compare_label(): sampling frequencies are different');
+        else
+            Fs=Fs1;
+        end
+    elseif exist(tmp1, 'file')==2
         Fs=Fs1;
+        length2=length1;
+    elseif exist(tmp2, 'file')==2
+        Fs=Fs2;
+        length1=length2;
     end
 
     % create song structures
     tmp1=regexprep(filename1(end:-1:1),'lebal.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
     label2mlf( filename1, tmp1 ) ;
-    song1 = mlf2song( tmp1, [], 3) ;
+    song1 = mlf2song( tmp1, [], 3, 0, 0, 0, 0, Fs) ;
 
     tmp2=regexprep(filename2(end:-1:1),'lebal.','flm.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
     label2mlf( filename2, tmp2 ) ;
-    song2 = mlf2song( tmp2, [], 3) ;
+    song2 = mlf2song( tmp2, [], 3, 0, 0, 0, 0, Fs) ;
 
     % check for compatibility between the songs, need exactly the same syllable types, if not add zero length syllables at the end
     for missing = setdiff( unique(song2.sequence),unique(song1.sequence) )
@@ -94,7 +106,7 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
         fprintf(outid, '%s,', annotlabel{i});
     end
     fclose(outid);
-    dlmwrite([filename2 '.csv'],cmat,'roffset',1,'-append') ;
+    dlmwrite([filename2 '_confusion.csv'],cmat,'roffset',1,'-append') ;
     %T = table(cmat,'RowNames',annotlabel) ;
     %writetable(T,[filename2 '.csv'],'WriteRowNames',true) ;
     
@@ -119,6 +131,13 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
         % pvalue computated with alpha=5%
         fprintf(1,'p-value = %.4f (%.0f random permutations, mean=%.2f%%)\n',sum(nullsim>=similarity)/N,N,mean(nullsim)*100) ;
     end
+    
+    %% clean up
+    delete(tmp1) ;
+    delete(tmp2) ;
+    
+    
+    %% Private functions
     
     function [simscore] = simcountlab(cntlab1,cntlab2,binsiz)
         % euclidean distance of each row vector

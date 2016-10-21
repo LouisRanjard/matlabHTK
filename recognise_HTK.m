@@ -60,7 +60,7 @@ fid = fopen(outputfile, 'w');
 if fid~=-1
     fprintf(fid, ',duration_sec');
     for n=1:numel(uniksequencetxt)
-        fprintf(fid, ',%s,',uniksequencetxt{n});
+        fprintf(fid, ',%s (time),%s (events)',uniksequencetxt{n},uniksequencetxt{n});
     end
     fprintf(fid, '\n');
     for nfiles=1:numel(files)
@@ -77,6 +77,7 @@ else
     fprintf(1,'cannot open file: %s \n',outputfile);
 end
 
-% clean path
+% clean up
+delete(fullfile(dirnameB,'*.mlf')) ;
 rmpath(dirnameB) ;
 

@@ -5,11 +5,13 @@ This tutorial presents how to set a HMM recogniser using previously annotated ex
 ---
 
 #### Download and unzip the last version of matlabHTK from https://github.com/LouisRanjard/matlabHTK
-Add the matlabHTK function to the Matlab/Octave path and change directory to the tutorial directory
+Open Octave or Matlab. Add the matlabHTK function to the Matlab/Octave path and change directory to the tutorial directory. For example, if the package was downloaded in /home/louis:
 ```
-addpath(genpath('matlabHTK')) ;
-cd /path/to/Tutorial_diving_petrel ;
+addpath(genpath('/home/louis/matlabHTK-master')) ;
+cd /home/louis/matlabHTK-master/Tutorial_diving_petrel ;
+more off;
 ```
+Use `more off;` in Octave to suppress some unnecessary messages (disable Paging Screen Output).
 
 #### Training
 Set up and train HMMs for each label found in the manually annotated label files in training directory
@@ -20,13 +22,13 @@ train_HTK('./training');
 #### Recognition
 Run the recognition for all wav files found in the recognition directory
 ```
-recognise_HTK('./training_dir/train_HTK','./recognition');
+recognise_HTK('./training/train_HTK','./recognition');
 ```
 
 #### Plot
-Plot the recognition results for the label 'diving_petrel'
+Plot the recognition results for the label 'diving_petrel'. Input the date and time when the recording started.
 ```
-plot_Label('./recognition/reference/recording.label','./recognition/recording.wav','diving_petrel');
+plot_Label('./recognition/recording.label','./recognition/recording.wav','diving_petrel',10,'25/09/2014 18:00:00');
 ```
 
 ---
@@ -37,10 +39,15 @@ plot_Label('./recognition/reference/recording.label','./recognition/recording.wa
 
 * __Parameter value testing__
 
-Different values for the HTK sound parameters was tested and the similarity score was calculated for a manually annotated recording using the following function
+Different values for the HTK sound parameters were tested and the similarity score was calculated for a manually annotated recording using the following function
 ```
-compare_label('reference.label','recording.label',30);
+compare_label('./recognition/reference/recording.label','./recognition/recording.label',30);
 ```
+Tests were performed by sequentially modifying the value of one parameter chosen from the set of parameter values that gave the best results. If a specific change increased the similarity score then it was kept identical for the rest of the tests. A thorough description of the parameters can be found in the HTK Book (Young et al., 2006). To control for consistency, the set of parameters that gave the best results was tested three times. The replicated model building and recognition gave similar similarity scores (89.23%, 89.12% and 89.23%). The randomisation test was performed using 60-second time window bins and indicated that the recognition was better than expected by chance, with a significant p-value (<<0.001). 
+
+&nbsp;
+
+__Table__. The set of HTK parameter values investigated and corresponding similarity scores against the visually annotated recording file. In all tests, the TARGETKIND parameter was set to MFCC. Inclusion of the delta parameters correspond to option _D, _A, _T in the HTK parameter file and the cepstral mean normalisation (cmn) correspond to _Z. For example, the first column correspond to the following HTK parameter file option for encoding TARGETKIND=MFCC_D_A_E. The other HTK parameters are indicated in the column names.
 
 NUMCEPS | energy | delta | ddelta | dddelta | cmn | WINDOWSIZE (ms) | LOFREQ | HIFREQ | ZMEANSOURCE | USEHAMMING | PREEMCOEF | NUMCHANS | CEPLIFTER | ENORMALISE | Similarity versus manual annotation
 --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
@@ -76,6 +83,9 @@ NUMCEPS | energy | delta | ddelta | dddelta | cmn | WINDOWSIZE (ms) | LOFREQ | H
 12 | E | 1 | 1 |  |  | 1 | 0 | 22050 | T | T | 0.97 | 26 | 22 | T | 37.99%
 
 
+The default values of the parameters for representing the sound and constructing the HMMs have been optimised for analysing bird vocalisation data (see Table below). However, a given dataset may benefit from slight changes in these values. For example, a frequency band pass filter can be defined in the HTK parameter file when prior knowledge can inform the target frequencies of interest using LOFREQ and HIFREQ options. The structure of the HMM can be also be modified allowing the user to set the number of states and Gaussian mixtures to model these states. It is also possible to set a minimum duration thresholds in ms for the annotated part of the recordings and the gap separating them, arguments _sylminlength_ and _gapminlength_ of the function _recognise_HTK()_. After the HTK recognition is performed, consecutive labels will be merged or deleted depending on the values of these thresholds. These values can be used to avoid recognising too short sound segments when information on the duration of the target vocalisations is known.
+
+
 * __Parameter description__
 
 To change the parameter values, edit file 'matlabHTK/createcffile_mixt.m'
@@ -98,4 +108,3 @@ ENORMALISE | Normalise log energy | T
 LOFREQ | Low frequency cut-off in fbank analysis | 500
 HIFREQ | High frequency cut-off in fbank analysis | 12000
 
-Additionnally, the structure of the HMM can be also be modified in the same file allowing the user to set the number of states and Gaussian mixtures to model these states.
