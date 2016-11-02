@@ -66,7 +66,7 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
         song2.SyllableE = [song2.SyllableE song2.SyllableE(end)] ;
     end
     
-    % create tables to use the comparison process
+    % create tables to use in the comparison process
     syltable1 = song2table(song1) ;
     [countlab1, uniklabel1] = syltable_bins(syltable1,binsiz,Fs,length1(1)) ;
 
@@ -90,23 +90,45 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
 
     % create confusion matrix
     cmat = confusionmatrix(countlab1,countlab2,uniklabel1) ;
-    % discard first label which is "0"
+    % discard first label which is 0 inserted by song2table for gaps between annotated sounds
     if (uniklabel1(1)==0)
         codelabel = uniklabel1(2:end) ;
         cmat = cmat(2:end,2:end) ;
     end
+    % discard first label which is "0" (code 48) for sounds annotated as "0" by HTK
+    % COMMENTED: need to be kept as some true annotation in one file may be label such as in the second
+    %if (uniklabel1(1)==48)
+    %    codelabel = uniklabel1(2:end) ;
+    %    cmat = cmat(2:end,2:end) ;
+    %end
     % get the character annotation labels
     annotlabel = cell(1,length(codelabel)) ;
     for l=1:length(codelabel)
         annotlabel{l} = song1.sequencetxt{find(song1.sequence==codelabel(l),1)} ;
     end
     % write to file
-    outid = fopen([filename2 '.csv'], 'w+');
+    outid = fopen([filename2 '_confusion.csv'], 'w+');
+    [~,f1]=fileparts(filename1);
+    [~,f2]=fileparts(filename2);
+    %[ repmat({f2},1,numel(annotlabel)); annotlabel ]
+    fprintf(outid, ',,');
+    for i = 1:length(annotlabel)
+        fprintf(outid, '%s,', f2); % the second filename annotation is in column
+    end
+    fprintf(outid, '\n,,');
     for i = 1:length(annotlabel)
         fprintf(outid, '%s,', annotlabel{i});
     end
+    fprintf(outid, '\n');
+    for i = 1:length(annotlabel)
+        fprintf(outid, '%s,%s,', f1, annotlabel{i});
+        for j = 1:length(annotlabel)
+            fprintf(outid, '%f,', cmat(i,j));
+        end
+        fprintf(outid, '\n');
+    end
     fclose(outid);
-    dlmwrite([filename2 '_confusion.csv'],cmat,'roffset',1,'-append') ;
+    %dlmwrite([filename2 '_confusion.csv'],cmat,'roffset',1,'-append') ;
     %T = table(cmat,'RowNames',annotlabel) ;
     %writetable(T,[filename2 '.csv'],'WriteRowNames',true) ;
     
