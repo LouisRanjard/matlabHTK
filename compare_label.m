@@ -52,18 +52,18 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
     label2mlf( filename2, tmp2 ) ;
     song2 = mlf2song( tmp2, [], 3, 0, 0, 0, 0, Fs) ;
 
-    % check for compatibility between the songs, need exactly the same syllable types, if not add zero length syllables at the end
-    for missing = setdiff( unique(song2.sequence),unique(song1.sequence) )
-        song1.sequence = [song1.sequence missing] ;
-        song1.sequencetxt = [song1.sequencetxt song2.sequencetxt(find(song2.sequence==missing,1,'first')) ] ;
-        song1.SyllableS = [song1.SyllableS song1.SyllableE(end)] ;
-        song1.SyllableE = [song1.SyllableE song1.SyllableE(end)] ;
+    % check for compatibility between the songs, need exactly the same syllable types, if not add zero length syllables at the beginning
+    for missing1 = setdiff( unique(song2.sequence),unique(song1.sequence) )
+        song1.sequence = [ missing1 song1.sequence ] ;
+        song1.sequencetxt = [ song2.sequencetxt(find(song2.sequence==missing1,1,'first')) song1.sequencetxt ] ;
+        song1.SyllableS = [ 0 song1.SyllableS ] ;
+        song1.SyllableE = [ 0 song1.SyllableE ] ;
     end
-    for missing = setdiff( unique(song1.sequence),unique(song2.sequence) )
-        song2.sequence = [song2.sequence missing] ;
-        song2.sequencetxt = [song2.sequencetxt song1.sequencetxt(find(song1.sequence==missing,1,'first')) ] ;
-        song2.SyllableS = [song2.SyllableS song2.SyllableE(end)] ;
-        song2.SyllableE = [song2.SyllableE song2.SyllableE(end)] ;
+    for missing2 = setdiff( unique(song1.sequence),unique(song2.sequence) )
+        song2.sequence = [ missing2 song2.sequence ] ;
+        song2.sequencetxt = [ song1.sequencetxt(find(song1.sequence==missing2,1,'first')) song2.sequencetxt ] ;
+        song2.SyllableS = [ 0 song2.SyllableS ] ;
+        song2.SyllableE = [ 0 song2.SyllableE ] ;
     end
     
     % create tables to use in the comparison process
