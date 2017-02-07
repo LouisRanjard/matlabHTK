@@ -20,9 +20,9 @@ all_label = cell(0,2) ;
 for n = 1:numel(files)
     if check==1
         if repair==1
-            check_label(fullfile(dirna,files(n).name),1);
+            check_label(fullfile(dirname,files(n).name),1);
         else
-            check_label(fullfile(dirna,files(n).name))  ;
+            check_label(fullfile(dirname,files(n).name))  ;
         end
     end
     % create song structures
