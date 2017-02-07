@@ -1,4 +1,6 @@
 function [] = textGrid2label( filename1, filename2 )
+% convert TextGrid HTK file format to label Audacity annotation format
+% 
 
 filename3 = [filename2 '.mlf'];
 

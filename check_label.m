@@ -3,6 +3,8 @@ function [] = check_label( filename, repair )
 % tells if some label are overlapping, if they do, repair them by merging
 % boundaries
 %
+% repair: if==1, try to repair the files
+%
 % example: 
 % files = dir(fullfile(dirna,'*.label')) ;
 % for nf=1:numel(files), check_label(fullfile(dirna,files(nf).name)), end
