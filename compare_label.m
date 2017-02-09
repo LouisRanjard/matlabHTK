@@ -1,13 +1,16 @@
-function [similarity] = compare_label(filename1,filename2,binsiz,N)
+function [similarity, pval] = compare_label(filename1,filename2,binsiz,N)
 % compare two LABEL files
 % need to have the wav files in the same directory (to get the Fs)
 % if N provided build a null distribution of similarity using N random countlab matrices
 % binsiz: size of the bins to compare the two textgrid files in seconds
 % example: [similarity] = compare_label('/Sounds/Todd_files/Todd_Meeting_23JAN10/manual_annotation/end_of_01_manual_annotation.label','/Sounds/Todd_files/Todd_Meeting_23JAN10/test_quackass_window100ms/end_of_01_manual_annotation.label');
 
-    if nargin<3
-        % choose bin size in seconds
-        binsiz = 30 ;
+    if nargin<4
+        pval=NaN;
+        if nargin<3
+            % choose bin size in seconds
+            binsiz = 30 ;
+        end
     end
 
     % get the Fs
@@ -43,6 +46,11 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
         length1=length2;
     end
 
+    % check if Fs was found
+    if exist('Fs','var')==0
+        error('compare_label(): need both .label and .wav files in the same directory');
+    end
+    
     % create song structures
     tmp1=regexprep(filename1(end:-1:1),'lebal.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
     label2mlf( filename1, tmp1 ) ;
@@ -151,7 +159,8 @@ function [similarity] = compare_label(filename1,filename2,binsiz,N)
             nullsim(permut) = simcountlab(countlab1,cntlabrand,binsiz) ;
         end
         % pvalue computated with alpha=5%
-        fprintf(1,'p-value = %.4f (%.0f random permutations, mean=%.2f%%)\n',sum(nullsim>=similarity)/N,N,mean(nullsim)*100) ;
+        pval = sum(nullsim>=similarity)/N ;
+        fprintf(1,'p-value = %.4f (%.0f random permutations, mean=%.2f%%)\n',pval,N,mean(nullsim)*100) ;
     end
     
     %% clean up
