@@ -120,7 +120,7 @@ encodeWavlist(fullfile(rootdir,'hmms',['HMM' num2str(id)],'data','sig'),fullfile
 % create the HMM prototype and train it
 system(['cp ' rootdir '/hmmprototype/hmmproto ' rootdir '/hmms/HMM' num2str(id) '/model/proto/hmm' num2str(id) '_']) ; % copy the prototype
 % setstr(39) is ASCII code for single quote "'"
-system(['sed ' setstr(39) 's/""/"syl' num2str(id) '"/g' setstr(39) ' ' rootdir '/hmms/HMM' num2str(id) '/model/proto/hmm' num2str(id) '_ > ' rootdir '/hmms/HMM' num2str(id) '/model/proto/hmm' num2str(id)]) ; % change the name for this particular hmm
+system(['sed ' char(39) 's/""/"syl' num2str(id) '"/g' char(39) ' ' rootdir '/hmms/HMM' num2str(id) '/model/proto/hmm' num2str(id) '_ > ' rootdir '/hmms/HMM' num2str(id) '/model/proto/hmm' num2str(id)]) ; % change the name for this particular hmm
 system(['rm -f ' rootdir '/hmms/HMM' num2str(id) '/model/proto/hmm' num2str(id) '_']) ;
 
 % initialise the HMM parameters
