@@ -30,15 +30,14 @@ function writehtk(file,d,fp,tc)
 %         16384  _V  Attach VQ index                        hd(9)
 %         32768  _T  Attach delta-delta-delta index         hd(10)
 
-%   Thanks to Scott Otterson for fixing a bug in writing ultra-long frames.
+%   Thanks to Scott Otterson for fixing a bug in writing ultra-long frames
+%   and to Mauricio Villegas for fixing the type specifications.
 
-%      Copyright (C) Mike Brookes 2005
-%      Version: $Id: writehtk.m,v 1.8 2007/05/04 07:01:39 dmb Exp $
+%      Copyright (C) Mike Brookes 2005-2015
+%      Version: $Id: writehtk.m 6241 2015-05-21 12:40:07Z dmb $
 %
 %   VOICEBOX is a MATLAB toolbox for speech processing.
 %   Home page: http://www.ee.ic.ac.uk/hp/staff/dmb/voicebox/voicebox.html
-%
-%   09 May 2015, Louis Ranjard, make octave compatible
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   This program is free software; you can redistribute it and/or modify
@@ -58,7 +57,7 @@ function writehtk(file,d,fp,tc)
 
 fid=fopen(file,'w','b');
 if fid < 0
-    error(sprintf('Cannot write to file %s',file));
+    error('Cannot write to file %s',file);
 end
 tc=bitset(tc,13,0);                 % silently ignore a checksum request
 
@@ -68,6 +67,7 @@ ndt=6;                              % number of bits for base type
 hb=floor(tc*pow2(-(ndt+nhb):-ndt));
 hd=hb(nhb+1:-1:2)-2*hb(nhb:-1:1);   % extract bits from type code
 dt=tc-pow2(hb(end),ndt);            % low six bits of tc represent data type
+tc=tc-65536*(tc>32767);
 
 if ~dt && (size(d,1)==1)             % if waveform is a row vector
     d=d(:);                         % ... convert it to a column vector
@@ -85,8 +85,8 @@ if hd(5)                            % if compressed
     d=d.*repmat(a,nf,1)-repmat(b,nf,1); % compress the data
     nf=nf+4;                        % adjust frame count to include compression factors
 end
-fwrite(fid,nf,'long');              % write frame count
-fwrite(fid,round(fp*1.E7),'long');  % write frame period (in 100 ns units)
+fwrite(fid,nf,'int32');             % write frame count
+fwrite(fid,round(fp*1.E7),'int32'); % write frame period (in 100 ns units)
 if any(dt==[0,5,10]) || hd(5)        % write data as shorts
     if dt==5                        % IREFC has fixed scale factor
         d=d*32767;
@@ -96,24 +96,24 @@ if any(dt==[0,5,10]) || hd(5)        % write data as shorts
     end
     nby=nv*2;
     if nby<=32767
-        fwrite(fid,nby,'short');        % write byte count
-        fwrite(fid,tc,'short');         % write type code
+        fwrite(fid,nby,'int16');        % write byte count
+        fwrite(fid,tc,'int16');         % write type code
         if hd(5)
-            fwrite(fid,a,'float');        % write compression factors
-            fwrite(fid,b,'float');
+            fwrite(fid,a,'float32');    % write compression factors
+            fwrite(fid,b,'float32');
         end
-        fwrite(fid,d.','short');        % write data array
+        fwrite(fid,d.','int16');        % write data array
     end
 else
     nby=nv*4;
     if nby<=32767
-        fwrite(fid,nby,'short');        % write byte count
-        fwrite(fid,tc,'short');         % write type code
-        fwrite(fid,d.','float');        % write data array
+        fwrite(fid,nby,'int16');        % write byte count
+        fwrite(fid,tc,'int16');         % write type code
+        fwrite(fid,d.','float32');      % write data array
     end
 end
 fclose(fid);
 if nby>32767
     delete(file);                       % remove file if byte count is rubbish
-    error(sprintf('byte count of frame is %d which exceeds 32767 (is data transposed?)',nby));
+    error('byte count of frame is %d which exceeds 32767 (is data transposed?)',nby);
 end

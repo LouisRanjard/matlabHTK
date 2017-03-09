@@ -34,9 +34,10 @@ function [d,fp,dt,tc,t]=readhtk(file)
 %       T = text version of type code e.g. LPC_C_K
 
 %   Thanks to Dan Ellis (ee.columbia.edu) for sorting out decompression.
+%   Thanks to Stuart Anderson (whispersys.com) for making it work on 64 bit machines.
 
 %      Copyright (C) Mike Brookes 2005
-%      Version: $Id: readhtk.m,v 1.8 2007/05/04 07:01:39 dmb Exp $
+%      Version: $Id: readhtk.m 713 2011-10-16 14:45:43Z dmb $
 %
 %   VOICEBOX is a MATLAB toolbox for speech processing.
 %   Home page: http://www.ee.ic.ac.uk/hp/staff/dmb/voicebox/voicebox.html
@@ -61,10 +62,11 @@ fid=fopen(file,'r','b');
 if fid < 0
     error(sprintf('Cannot read from file %s',file));
 end
-nf=fread(fid,1,'long');             % number of frames
-fp=fread(fid,1,'long')*1.E-7;       % frame interval (converted to seconds)
-by=fread(fid,1,'short');            % bytes per frame
-tc=fread(fid,1,'short');            % type code (see comments above for interpretation)
+nf=fread(fid,1,'int32');             % number of frames
+fp=fread(fid,1,'int32')*1.E-7;       % frame interval (converted to seconds)
+by=fread(fid,1,'int16');            % bytes per frame
+tc=fread(fid,1,'int16');            % type code (see comments above for interpretation)
+tc=tc+65536*(tc<0);
 cc='ENDACZK0VT';                    % list of suffix codes
 nhb=length(cc);                     % number of suffix codes
 ndt=6;                              % number of bits for base type
@@ -86,7 +88,7 @@ if (dt==5)  % hack to fix error in IREFC files which are sometimes stored as com
 end
 
 if any(dt==[0,5,10])        % 16 bit data for waveforms, IREFC and DISCRETE
-    d=fread(fid,[by/2,nf],'short').';
+    d=fread(fid,[by/2,nf],'int16').';
     if ( dt == 5),
         d=d/32767;                    % scale IREFC
     end
@@ -96,7 +98,7 @@ else
         ncol = by / 2;
         scales = fread(fid, ncol, 'float');
         biases = fread(fid, ncol, 'float');
-        d = ((fread(fid,[ncol, nf], 'short')+repmat(biases,1,nf)).*repmat(1./scales,1,nf)).';
+        d = ((fread(fid,[ncol, nf], 'int16')+repmat(biases,1,nf)).*repmat(1./scales,1,nf)).';
     else                              % uncompressed data
         d=fread(fid,[by/4,nf],'float').';
     end
