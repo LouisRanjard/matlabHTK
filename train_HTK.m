@@ -99,7 +99,7 @@ songtrain = song_fill_seq(songtrain,uniksequencetxt,1) ;
 % end
 % save('-v7',fullfile(dirnameA,'songs.mat'),'song') ;
 
-%%% HTK TRAIN A HMM FOR SIGNAL/NOISE 
+%%% HTK TRAIN A HMM
 % convert all sequences into "1" sequences, thus all syllable have the same id
 %for n=1:numel(song) song(n).sequence=(song(n).sequence.*0)+1 ; end
 if ~exist(fullfile(dirnameA,'train_HTK'),'file'), mkdir(fullfile(dirnameA,'train_HTK')) ; end

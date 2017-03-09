@@ -28,7 +28,7 @@ recognise_HTK('./training/train_HTK','./recognition');
 #### Plot
 Plot the recognition results for the label 'diving_petrel'. Input the date and time when the recording started.
 ```
-plot_Label('./recognition/recording.label','./recognition/recording.wav','diving_petrel',10,'25/09/2014 18:00:00');
+plot_Label('./recognition/recording.label','./recognition/recording.wav','diving_petrel',10,'25/09/2014 18:00:00',1);
 ```
 
 ---

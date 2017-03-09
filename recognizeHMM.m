@@ -34,7 +34,7 @@ for idl=1:numel(idlist)
 	% [INFO, ERR, MSG] = stat([rootdir '/hmms/HMM' num2str(idlist(idl)) '/model/hmm10/hmm' num2str(idlist(idl))]) ; % OCTAVE
     % if ERR==0
     nrest = 1 ;
-    while exist(fullfile(rootdir, 'hmms', ['HMM' num2str(idlist(idl))], 'model', ['hmm' num2str(nrest+1)]),'file') ;
+    while exist(fullfile(rootdir, 'hmms', ['HMM' num2str(idlist(idl))], 'model', ['hmm' num2str(nrest+1)]),'file')
         nrest = nrest+1 ;
     end
 	if exist([rootdir '/hmms/HMM' num2str(idlist(idl)) '/model/hmm' num2str(nrest) '/hmm' num2str(idlist(idl))],'file')

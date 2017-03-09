@@ -90,7 +90,11 @@ for sg=randperm(numel(song)) % randomise the index of songs
 		if (fin-deb)>((50*Fs)/1000) % minimum syllable length 50ms
 			idsyl = [num2str(sg) '_' num2str(sy) '_' num2str(id)] ; % unique identifier for the current syllable: #song_#syllable_id
 			% wavwrite([rootdir '/hmms/HMM' num2str(id) '/data/sig/sig' idsyl '.wav'], y(deb:fin), Fs, bits) ;
-			wavwrite(y(deb:fin), Fs, bits, fullfile(rootdir,'hmms',['HMM' num2str(id)],'data','sig',['sig' idsyl '.wav'])) ; % change for Matlab R2008b
+            if is_octave()
+			    wavwrite(y(deb:fin), Fs, bits, fullfile(rootdir,'hmms',['HMM' num2str(id)],'data','sig',['sig' idsyl '.wav'])) ; % Octave, old Matlab
+            else
+                audiowrite(fullfile(rootdir,'hmms',['HMM' num2str(id)],'data','sig',['sig' idsyl '.wav']), y(deb:fin), Fs, 'BitsPerSample', bits) ;
+            end
 			% update the wavlist file
 			fprintf(fidwavlist,'%s %s\n',fullfile(rootdir,'hmms',['HMM' num2str(id)],'data','sig',['sig' idsyl '.wav']),...
                 fullfile(rootdir,'hmms',['HMM' num2str(id)],'data','coeff',['sig' idsyl '.vect'])) ;

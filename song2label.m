@@ -22,9 +22,14 @@ if numel(strfind(filename,song.filename))==0
         error(['file not found ' song.filename ':' filename]);
 end
 fprintf(1,filename);
-siz = wavread(filename,'size') ;
-% need to get the Fs from the wav file
-[~, Fs] = wavread(filename,1); % only read the first sample
+if is_octave()
+    siz = wavread(filename,'size') ;
+    [~, Fs] = wavread(filename,1); % need to get the Fs from the wav file, only read the first sample
+else
+    info = audioinfo(filename);
+    Fs = info.SampleRate;
+    siz = info.TotalSamples;
+end
 
 maxlen = siz(1)/Fs ;
 
