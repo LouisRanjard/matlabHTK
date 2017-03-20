@@ -1,10 +1,14 @@
-function [songsmatfile, song] = recognise_HTK(dirnameA,dirnameB,gapminlength,sylminlength,maxfilechunk)
+function [songsmatfile, song] = recognise_HTK(dirnameA,dirnameB,gapminlength,sylminlength,maxfilechunk,dirnameC)
 % dirnameA must contains trained HTK recogniser
 % dirnameB must contains .wav files to be recognized
+% dirnameC (optional) is the directory where to write the output
 % return file name of the songs datastructure with divided songs
 
 % allow to find wav file
 addpath(dirnameB);
+
+% default is to write in the same directory as where the wav files are
+if nargin<6, dirnameC=dirnameB ; end
 
 % default maximum file duration in minutes to be recognised (split files if larger)
 if nargin<5, maxfilechunk=240 ; end
@@ -23,18 +27,18 @@ uniksequencetxt = uniksequencetxt{1};
 sylid = 1:numel(uniksequencetxt);
 
 %%% RUN RECOGNIZER
-recognizeHMM(sylid, fullfile(dirnameA), fullfile(dirnameA,'/def'), dirnameB, dirnameB, [], maxfilechunk) ;
+recognizeHMM(sylid, fullfile(dirnameA), fullfile(dirnameA,'/def'), dirnameB, dirnameC, [], maxfilechunk) ;
 
 %%% create the song datastructure for dirnameB and save songs.mat
-files = dir(fullfile(dirnameB,'*.mlf')) ;
+files = dir(fullfile(dirnameC,'*.mlf')) ;
 song = [] ;
 for nfiles=1:numel(files)
-    song = mlf2song( fullfile(dirnameB,files(nfiles).name), song, 2, gapminlength, sylminlength, 1) ;
+    song = mlf2song( fullfile(dirnameC,files(nfiles).name), song, 2, gapminlength, sylminlength, 1) ;
 end
 
 % replace each syllable name as a numerical code to fill up song(n).sequence
 song = song_fill_seq(song,uniksequencetxt,2);
-songsmatfile = fullfile(dirnameB,'songs.mat') ;
+songsmatfile = fullfile(dirnameC,'songs.mat') ;
 %save('-v7',songsmatfile,'song') ;
 
 for nfiles=1:numel(files)
@@ -43,7 +47,7 @@ for nfiles=1:numel(files)
     %song2textGrid( song(nfiles), fullfile(dirnameB,tmp), 2 ) ;
     % write a label file with the syllable boundaries after having merged and cleaned with mlf2song()
     tmp=regexprep(files(nfiles).name(end:-1:1),'flm.','lebal.','once');tmp=tmp(end:-1:1); % allows to replace just once, the last one
-    song2label( song(nfiles), fullfile(dirnameB,tmp), 2 ) ;
+    song2label( song(nfiles), fullfile(dirnameC,tmp), 2 ) ;
     % delete mlf file
     
 end
@@ -58,7 +62,7 @@ end
 %soong(dirnameB,song);
 
 %%% save recognition data to csv file
-outputfile = fullfile(dirnameB,['/recognise_HTK_',datestr(now, 'yyyymmddMMSS'),'.csv']);
+outputfile = fullfile(dirnameC,['/recognise_HTK_',datestr(now, 'yyyymmddMMSS'),'.csv']);
 fid = fopen(outputfile, 'w');
 if fid~=-1
     fprintf(fid, ',duration_sec');
@@ -81,6 +85,6 @@ else
 end
 
 % clean up
-delete(fullfile(dirnameB,'*.mlf')) ;
-rmpath(dirnameB) ;
+delete(fullfile(dirnameC,'*.mlf')) ;
+rmpath(dirnameC) ;
 

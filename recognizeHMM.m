@@ -49,32 +49,34 @@ fclose(fid) ;
 recfiles = dir(fullfile(filesdir,'*.wav')) ;
 for recf=1:numel(recfiles)
     if is_octave()
-        [~, Fs] = wavread(fullfile(destdir,recfiles(recf).name),1) ;
-        TotalSamples = wavread(fullfile(destdir,recfiles(recf).name),'size') ;
+        [~, Fs] = wavread(fullfile(filesdir,recfiles(recf).name),1) ;
+        TotalSamples = wavread(fullfile(filesdir,recfiles(recf).name),'size') ;
     else
-        info = audioinfo(fullfile(destdir,recfiles(recf).name));
+        info = audioinfo(fullfile(filesdir,recfiles(recf).name));
         Fs = info.SampleRate;
         TotalSamples = info.TotalSamples;
     end
     chunkCnt = 1;
     for startLoc = 1:(maxfilechunk*60*Fs):TotalSamples % break into file of chunk size max
         endLoc = min(startLoc + maxfilechunk*60*Fs - 1, TotalSamples);
-        if (TotalSamples>endLoc) % write a temporary wav file of required length
+        if (TotalSamples>endLoc || chunkCnt>1) % write a temporary wav file of required length
             FileName = sprintf('outfile%03d.wav', chunkCnt);
             if is_octave()
-                y = wavread(fullfile(destdir,recfiles(recf).name), [startLoc endLoc]);
+                y = wavread(fullfile(filesdir,recfiles(recf).name), [startLoc endLoc]);
                 wavwrite(y, Fs, fullfile(destdir,FileName));
             else
-                y = audioread(fullfile(destdir,recfiles(recf).name), [startLoc endLoc]);
+                y = audioread(fullfile(filesdir,recfiles(recf).name), [startLoc endLoc]);
                 audiowrite(fullfile(destdir,FileName), y, Fs);
             end
             chunkCnt = chunkCnt + 1;
+            [~,filenoext,~] = fileparts(FileName) ;
+            encodeWavlist( destdir, fullfile(rootdir,'analysis'), destdir, normavec, filenoext) ;
         elseif (chunkCnt == 1)
-            FileName = recfiles(recf).name;
+            FileName = recfiles(recf).name;            
+            % system(['HCopy -A -C ' rootdir '/analysis/analysis.conf ' fullfile(filesdir,recfiles(recf).name) ' ' strrep(fullfile(filesdir,recfiles(recf).name),'.wav','.vect')]) ;
+            [~,filenoext,~] = fileparts(FileName) ;
+            encodeWavlist( filesdir, fullfile(rootdir,'analysis'), destdir, normavec, filenoext) ;
         end
-        % system(['HCopy -A -C ' rootdir '/analysis/analysis.conf ' fullfile(filesdir,recfiles(recf).name) ' ' strrep(fullfile(filesdir,recfiles(recf).name),'.wav','.vect')]) ;
-        [~,filenoext,~] = fileparts(FileName) ;
-        encodeWavlist( filesdir, fullfile(rootdir,'analysis'), destdir, normavec, filenoext) ;
         % run the Viterbi
         tmp1=regexprep(FileName(end:-1:1),'vaw.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
         tmp2=regexprep(FileName(end:-1:1),'vaw.','tcev.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
