@@ -99,8 +99,8 @@ for recf=1:numel(recfiles)
             tline = fgetl(fidi) ;
             if numel( strfind(tline,'#!MLF!#') )==0, error(1,('recognizeHMM(): mlf file format error\n')); end
             tline = fgetl(fidi) ; % skip mlf file name
-            tline = fgetl(fidi) ;
-            while 1
+            tline = fgetl(fidi) ; % returns -1 if cannot read line
+            while ischar(tline)
                 if strcmp(tline,'.')==1, break, end % if the line is "." it means the eof is reached
                 A = sscanf(tline,'%f %f syl%f %*f') ; % get beginning and end and name of recognised segment
                 [B, ~, errmsg] = sscanf(tline,'%*f %*f %s %*f') ; % get the segment name

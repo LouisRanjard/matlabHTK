@@ -79,7 +79,7 @@ minlsyl = minlsyl*(Fs/1000) ;
 
 % fill the song structure
 tline = fgetl(fid) ;
-while 1
+while ischar(tline)
     if strcmp(tline,'.')==1, break, end % if the line is "." it means the eof is reached
     %[A, count, errmsg] = sscanf(tline,'%f %f syl%f %f') ;
     A = sscanf(tline,'%f %f syl%f %*f') ; % get beginning and end and syl number
