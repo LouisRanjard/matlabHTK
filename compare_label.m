@@ -1,15 +1,19 @@
-function [similarity, pval] = compare_label(filename1,filename2,binsiz,N)
+function [similarity, pval] = compare_label(filename1,filename2,binsiz,N,deletetmpfile)
 % compare two LABEL files
 % need to have the wav files in the same directory (to get the Fs)
 % if N provided build a null distribution of similarity using N random countlab matrices
 % binsiz: size of the bins to compare the two textgrid files in seconds
 % example: [similarity] = compare_label('/Sounds/Todd_files/Todd_Meeting_23JAN10/manual_annotation/end_of_01_manual_annotation.label','/Sounds/Todd_files/Todd_Meeting_23JAN10/test_quackass_window100ms/end_of_01_manual_annotation.label');
 
-    if nargin<4
-        pval=NaN;
-        if nargin<3
-            % choose bin size in seconds
-            binsiz = 30 ;
+    if nargin<5
+        deletetmpfile=1 ;
+        if nargin<4
+            pval=NaN;
+            N=0;
+            if nargin<3
+                % choose bin size in seconds
+                binsiz = 30 ;
+            end
         end
     end
 
@@ -53,11 +57,15 @@ function [similarity, pval] = compare_label(filename1,filename2,binsiz,N)
     
     % create song structures
     tmp1=regexprep(filename1(end:-1:1),'lebal.','flm.','once');tmp1=tmp1(end:-1:1); % allows to replace just once, the last one
-    label2mlf( filename1, tmp1 ) ;
+    if exist(tmp1, 'file')==0
+      label2mlf( filename1, tmp1 ) ;
+    end
     song1 = mlf2song( tmp1, [], 3, 0, 0, 0, 0, Fs) ;
 
     tmp2=regexprep(filename2(end:-1:1),'lebal.','flm.','once');tmp2=tmp2(end:-1:1); % allows to replace just once, the last one
-    label2mlf( filename2, tmp2 ) ;
+    if exist(tmp2, 'file')==0
+      label2mlf( filename2, tmp2 ) ;
+    end
     song2 = mlf2song( tmp2, [], 3, 0, 0, 0, 0, Fs) ;
 
     % check for compatibility between the songs, need exactly the same syllable types, if not add zero length syllables at the beginning
@@ -141,7 +149,7 @@ function [similarity, pval] = compare_label(filename1,filename2,binsiz,N)
     %writetable(T,[filename2 '.csv'],'WriteRowNames',true) ;
     
     % do randomization test?
-    if nargin>3
+    if N>0
         nullsim = zeros(1,N) ;
         for permut=1:N
             % randomly shuffle the second matrix
@@ -164,8 +172,10 @@ function [similarity, pval] = compare_label(filename1,filename2,binsiz,N)
     end
     
     %% clean up
-    delete(tmp1) ;
-    delete(tmp2) ;
+    if deletetmpfile
+      delete(tmp1) ;
+      delete(tmp2) ;
+    end
     
     
     %% Private functions
