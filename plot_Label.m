@@ -10,7 +10,7 @@ if nargin<6
 end
 
 if nargin<5
-    timestart = 0;
+    timestart = datestr(now,'dd/mm/yyyy HH:MM:SS') ;
     if nargin<4
         % choose bin size in seconds
         binsiz = 60 ;
@@ -18,9 +18,9 @@ if nargin<5
             label = 'diving_petrel' ;
         end
     end
-else
-    timestart = datenum(timestart,'dd/mm/yyyy HH:MM:SS') ;
 end
+   
+timestart = datenum(timestart,'dd/mm/yyyy HH:MM:SS') ;
 
 % get the Fs
 %tmp = regexprep(filename(end:-1:1),'dirGtxeT.','vaw.','once');

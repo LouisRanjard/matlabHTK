@@ -10,8 +10,12 @@ Open Octave or Matlab. Add the matlabHTK function to the Matlab/Octave path and 
 addpath(genpath('/home/louis/matlabHTK-master')) ;
 cd /home/louis/matlabHTK-master/Tutorial_diving_petrel ;
 more off;
+graphics_toolkit("gnuplot");
 ```
 Use `more off;` in Octave to suppress some unnecessary messages (disable Paging Screen Output).
+Depending on how you downloaded the package, you may need to use the path '/home/louis/matlabHTK' instead of '/home/louis/matlabHTK-master'.
+For correctly displaying plots in Octave, make sure you are using the gnuplot system `graphics_toolkit("gnuplot");`.
+
 
 #### Training
 Set up and train HMMs for each label found in the manually annotated label files in training directory
@@ -30,6 +34,7 @@ Plot the recognition results for the label 'diving_petrel'. Input the date and t
 ```
 plot_Label('./recognition/recording.label','./recognition/recording.wav','diving_petrel',10,'25/09/2014 18:00:00',1);
 ```
+
 
 ---
 

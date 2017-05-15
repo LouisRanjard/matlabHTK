@@ -1,11 +1,17 @@
 # matlabHTK
-## Matlab Interface to HTK for Bioacoustic
+## Matlab/Octave Interface to HTK for Bioacoustic
 
 ---
 
 MatlabHTK requires HTK (http://htk.eng.cam.ac.uk/) installed on system
 
 MatlabHTK uses VOICEBOX speech processing toolbox MATLAB routines to read/write HTK binary files (http://www.ee.ic.ac.uk/hp/staff/dmb/voicebox/voicebox.html)
+
+---
+
+##  How to cite
+
+Please use: Ranjard, L., Reed, B. S., Landers, T. J., Rayner, M. J., Friesen, M. R., Sagar, R. L. and Dunphy, B. J. (2016). MatlabHTK: A simple interface for bioacoustic analyses using hidden Markov models. Methods in Ecology and Evolution. doi:10.1111/2041-210X.12688
 
 ---
 
