@@ -11,7 +11,7 @@ MatlabHTK uses VOICEBOX speech processing toolbox MATLAB routines to read/write 
 
 ##  How to cite
 
-Please use: Ranjard, L., Reed, B. S., Landers, T. J., Rayner, M. J., Friesen, M. R., Sagar, R. L. and Dunphy, B. J. (2016). MatlabHTK: A simple interface for bioacoustic analyses using hidden Markov models. Methods in Ecology and Evolution. doi:10.1111/2041-210X.12688
+Please use: _**Ranjard, L., Reed, B. S., Landers, T. J., Rayner, M. J., Friesen, M. R., Sagar, R. L. and Dunphy, B. J. (2016). MatlabHTK: A simple interface for bioacoustic analyses using hidden Markov models. Methods in Ecology and Evolution. doi:10.1111/2041-210X.12688**_
 
 ---
 

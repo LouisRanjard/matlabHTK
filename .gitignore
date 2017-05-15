@@ -2,4 +2,5 @@
 *.html
 # ignore gedit backup files
 *.*~
-
+# ignore HTK temporary files created while testing Tutorial
+*.mlf
